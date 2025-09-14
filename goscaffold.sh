@@ -131,18 +131,29 @@ go-server() {
     echo ""
     echo "📁 Changing to project directory..."
     
-    # Determine the correct path based on whether a custom path was provided
+    # For interactive mode, we need to find the project name from the output
+    local actual_project_name="$project_name"
+    if [[ -z "$actual_project_name" ]]; then
+        # Try to find the most recently created directory in the default directory
+        actual_project_name=$(find "$default_dir" -maxdepth 1 -type d -newer "$default_dir" 2>/dev/null | head -1 | xargs basename)
+    fi
+    
+    # Use the EXACT same path that was passed to the Go generator
     local expanded_path=""
     if [[ -n "$project_path" ]]; then
-        # Use the custom path
+        # Use the custom path that was provided
         if [[ "$project_path" == /* ]]; then
             expanded_path="$project_path"
         else
             expanded_path="$original_dir/$project_path"
         fi
     else
-        # Use the default directory with project name
-        expanded_path="$default_dir/$project_name"
+        # Use the default directory with project name (same logic as Go generator)
+        if [[ -n "$NEW_GO_SERVER_DEFAULT_DIR" ]]; then
+            expanded_path="$NEW_GO_SERVER_DEFAULT_DIR/$actual_project_name"
+        else
+            expanded_path="$original_dir/$actual_project_name"
+        fi
     fi
     
     echo "📁 Changing to project directory: ~${expanded_path#$HOME}"
