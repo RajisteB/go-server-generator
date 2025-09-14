@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -76,12 +77,46 @@ func main() {
 
 	config := ProjectConfig{}
 
-	// Get project details
-	config.Name = getUserInput("Project name: ")
-	config.Module = getUserInput("Go module name (e.g., github.com/username/project): ")
-	config.Description = getUserInput("Project description: ")
-	config.Port = getUserInput("Server port [8080]: ")
-	config.ProjectPath = getUserInput("Project path (leave empty to create in current directory, or specify absolute/relative path): ")
+	// Parse command line flags
+	var (
+		name        = flag.String("name", "", "Project name")
+		module      = flag.String("module", "", "Go module name (e.g., github.com/username/project)")
+		description = flag.String("description", "", "Project description")
+		port        = flag.String("port", "8080", "Server port")
+		projectPath = flag.String("path", "", "Project path (leave empty to create in current directory)")
+	)
+	flag.Parse()
+
+	// Use command line arguments if provided, otherwise prompt for input
+	if *name != "" {
+		config.Name = *name
+	} else {
+		config.Name = getUserInput("Project name: ")
+	}
+
+	if *module != "" {
+		config.Module = *module
+	} else {
+		config.Module = getUserInput("Go module name (e.g., github.com/username/project): ")
+	}
+
+	if *description != "" {
+		config.Description = *description
+	} else {
+		config.Description = getUserInput("Project description: ")
+	}
+
+	if *port != "" {
+		config.Port = *port
+	} else {
+		config.Port = getUserInput("Server port [8080]: ")
+	}
+
+	if *projectPath != "" {
+		config.ProjectPath = *projectPath
+	} else {
+		config.ProjectPath = getUserInput("Project path (leave empty to create in current directory, or specify absolute/relative path): ")
+	}
 
 	// Set default port if empty
 	if config.Port == "" {
@@ -213,14 +248,10 @@ func initializeGoModule(projectPath, moduleName string) error {
 		return err
 	}
 
-	// Check if go.mod already exists in current directory
+	// The go.mod file is already created from template, so we don't need to initialize it
+	// Just verify it exists
 	if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
-		// Initialize go module only if go.mod doesn't exist
-		cmd := exec.Command("go", "mod", "init", moduleName)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("failed to initialize go module: %w\nOutput: %s", err, string(output))
-		}
+		return fmt.Errorf("go.mod file not found after template creation")
 	}
 
 	// Download dependencies

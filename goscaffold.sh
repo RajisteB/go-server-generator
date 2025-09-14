@@ -75,30 +75,32 @@ go-server() {
         return 1
     }
     
-    # If interactive mode or missing required parameters, run interactively
-    if [[ "$interactive_mode" == true ]] || [[ -z "$project_name" ]] || [[ -z "$module_name" ]]; then
-        echo "🚀 Starting Go Backend Project Generator..."
-        go run main.go
-    else
-        # Non-interactive mode with provided parameters
-        echo "🚀 Creating Go Backend Project: $project_name"
-        
-        # Create a temporary input file for non-interactive execution
-        local temp_input=$(mktemp)
-        {
-            echo "$project_name"
-            echo "$module_name"
-            echo "$description"
-            echo "$port"
-            echo "$project_path"
-        } > "$temp_input"
-        
-        # Run the generator with the input file
-        go run main.go < "$temp_input"
-        
-        # Clean up
-        rm "$temp_input"
+    # Build command arguments
+    local go_args=()
+    
+    if [[ -n "$project_name" ]]; then
+        go_args+=("-name" "$project_name")
     fi
+    
+    if [[ -n "$module_name" ]]; then
+        go_args+=("-module" "$module_name")
+    fi
+    
+    if [[ -n "$description" ]]; then
+        go_args+=("-description" "$description")
+    fi
+    
+    if [[ -n "$port" ]]; then
+        go_args+=("-port" "$port")
+    fi
+    
+    if [[ -n "$project_path" ]]; then
+        go_args+=("-path" "$project_path")
+    fi
+    
+    # Run the generator with arguments
+    echo "🚀 Starting Go Backend Project Generator..."
+    go run main.go "${go_args[@]}"
 }
 
 # Help function
