@@ -101,6 +101,28 @@ go-server() {
     # Run the generator with arguments
     echo "🚀 Starting Go Backend Project Generator..."
     go run main.go "${go_args[@]}"
+    
+    # Change to the created project directory
+    local final_project_path=""
+    if [[ -n "$project_path" ]]; then
+        final_project_path="$project_path"
+    else
+        final_project_path="$project_name"
+    fi
+    
+    # Only change directory if we have a valid project name and path
+    if [[ -n "$project_name" && -n "$final_project_path" ]]; then
+        echo ""
+        echo "📁 Changing to project directory: $final_project_path"
+        cd "$final_project_path" || {
+            echo "⚠️  Warning: Could not change to project directory: $final_project_path"
+            echo "   You may need to manually navigate to your project directory"
+        }
+    else
+        echo ""
+        echo "⚠️  Warning: Could not determine project directory to change into"
+        echo "   Please manually navigate to your project directory"
+    fi
 }
 
 # Help function
