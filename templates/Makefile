@@ -21,7 +21,6 @@ static-analysis:
 test:
 	@echo "Running unit tests..."
 	go test -v ./... -cover -short
-
 test-all: test
 
 coverage:

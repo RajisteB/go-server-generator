@@ -41,5 +41,9 @@ func GenerateShortUUID() string {
 
 // GenerateNamespaceShortUUID generates a short UUID with namespace prefix
 func GenerateNamespaceShortUUID(namespace string) string {
-	return fmt.Sprintf("%s_%s", namespace, GenerateShortUUID())
+	shortUUID := GenerateShortUUID()
+	if namespace == "" {
+		return shortUUID
+	}
+	return fmt.Sprintf("%s_%s", namespace, shortUUID)
 }

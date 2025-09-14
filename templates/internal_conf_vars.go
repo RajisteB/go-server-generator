@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/spf13/viper"
 	"{{.Module}}/internal/shared/validation"
 )
 
@@ -62,55 +63,79 @@ type ConfigVars struct {
 	RequestLimits RequestLimitsVars
 }
 
+// getEnvVar gets an environment variable using Viper with fallback to os.Getenv
+func getEnvVar(key string) string {
+	// First try to get from Viper (which loads from .env.local)
+	if viper.IsSet(key) {
+		return viper.GetString(key)
+	}
+	// Fallback to os.Getenv
+	return os.Getenv(key)
+}
+
 // LoadConfigVarsFromEnv loads and validates all application configuration variables from environment variables.
 func LoadConfigVarsFromEnv() (*ConfigVars, error) {
+	// Initialize Viper
+	viper.SetConfigName(".env.local")
+	viper.SetConfigType("env")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+
+	// Try to read .env.local file, ignore error if file doesn't exist
+	if err := viper.ReadInConfig(); err != nil {
+		// File doesn't exist or other error, continue with os.Getenv fallback
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// If it's not a "file not found" error, log it but continue
+			fmt.Printf("Warning: Error reading .env.local file: %v\n", err)
+		}
+	}
 	dbVars := DatabaseVars{
-		DatabaseHost:     os.Getenv("{{.Name | upper}}_DATABASE_HOST"),
-		DatabasePort:     os.Getenv("{{.Name | upper}}_DATABASE_PORT"),
-		DatabaseUser:     os.Getenv("{{.Name | upper}}_DATABASE_USER"),
-		DatabaseName:     os.Getenv("{{.Name | upper}}_DATABASE_NAME"),
-		DatabasePassword: os.Getenv("{{.Name | upper}}_DATABASE_PASSWORD"),
-		DatabaseSSLMode:  os.Getenv("{{.Name | upper}}_DATABASE_SSL_MODE"),
+		DatabaseHost:     getEnvVar("{{.Name | upper}}_DATABASE_HOST"),
+		DatabasePort:     getEnvVar("{{.Name | upper}}_DATABASE_PORT"),
+		DatabaseUser:     getEnvVar("{{.Name | upper}}_DATABASE_USER"),
+		DatabaseName:     getEnvVar("{{.Name | upper}}_DATABASE_NAME"),
+		DatabasePassword: getEnvVar("{{.Name | upper}}_DATABASE_PASSWORD"),
+		DatabaseSSLMode:  getEnvVar("{{.Name | upper}}_DATABASE_SSL_MODE"),
 	}
 
 	serverVars := ServerVars{
-		Environment: os.Getenv("{{.Name | upper}}_SERVER_ENV"),
-		Version:     os.Getenv("{{.Name | upper}}_SERVER_VERSION"),
-		Name:        os.Getenv("{{.Name | upper}}_SERVER_NAME"),
-		Host:        os.Getenv("{{.Name | upper}}_SERVER_HOST"),
-		Port:        os.Getenv("{{.Name | upper}}_SERVER_PORT"),
-		Protocol:    os.Getenv("{{.Name | upper}}_SERVER_PROTOCOL"),
+		Environment: getEnvVar("{{.Name | upper}}_SERVER_ENV"),
+		Version:     getEnvVar("{{.Name | upper}}_SERVER_VERSION"),
+		Name:        getEnvVar("{{.Name | upper}}_SERVER_NAME"),
+		Host:        getEnvVar("{{.Name | upper}}_SERVER_HOST"),
+		Port:        getEnvVar("{{.Name | upper}}_SERVER_PORT"),
+		Protocol:    getEnvVar("{{.Name | upper}}_SERVER_PROTOCOL"),
 	}
 
 	csrfVars := CSRFVars{
-		AuthKey: os.Getenv("{{.Name | upper}}_CSRF_AUTH_KEY"),
-		Secure:  os.Getenv("{{.Name | upper}}_CSRF_SECURE") == "false",
+		AuthKey: getEnvVar("{{.Name | upper}}_CSRF_AUTH_KEY"),
+		Secure:  getEnvVar("{{.Name | upper}}_CSRF_SECURE") == "false",
 	}
 
 	clerkVars := ClerkVars{
-		Key:    os.Getenv("{{.Name | upper}}_CLERK_KEY"),
-		Secret: os.Getenv("{{.Name | upper}}_CLERK_SECRET"),
+		Key:    getEnvVar("{{.Name | upper}}_CLERK_KEY"),
+		Secret: getEnvVar("{{.Name | upper}}_CLERK_SECRET"),
 	}
 
 	securityVars := SecurityVars{
-		CSPPolicy: os.Getenv("{{.Name | upper}}_SECURITY_CSP_POLICY"),
+		CSPPolicy: getEnvVar("{{.Name | upper}}_SECURITY_CSP_POLICY"),
 		HSTSMaxAge: func() int {
-			if val := os.Getenv("{{.Name | upper}}_SECURITY_HSTS_MAX_AGE"); val != "" {
+			if val := getEnvVar("{{.Name | upper}}_SECURITY_HSTS_MAX_AGE"); val != "" {
 				if parsed, err := strconv.Atoi(val); err == nil {
 					return parsed
 				}
 			}
 			return 31536000 // Default 1 year
 		}(),
-		FrameOptions:       os.Getenv("{{.Name | upper}}_SECURITY_FRAME_OPTIONS"),
-		ContentTypeOptions: os.Getenv("{{.Name | upper}}_SECURITY_CONTENT_TYPE_OPTIONS") != "false",
-		ReferrerPolicy:     os.Getenv("{{.Name | upper}}_SECURITY_REFERRER_POLICY"),
-		PermissionsPolicy:  os.Getenv("{{.Name | upper}}_SECURITY_PERMISSIONS_POLICY"),
+		FrameOptions:       getEnvVar("{{.Name | upper}}_SECURITY_FRAME_OPTIONS"),
+		ContentTypeOptions: getEnvVar("{{.Name | upper}}_SECURITY_CONTENT_TYPE_OPTIONS") != "false",
+		ReferrerPolicy:     getEnvVar("{{.Name | upper}}_SECURITY_REFERRER_POLICY"),
+		PermissionsPolicy:  getEnvVar("{{.Name | upper}}_SECURITY_PERMISSIONS_POLICY"),
 	}
 
 	requestLimitsVars := RequestLimitsVars{
 		MaxRequestSize: func() int64 {
-			if val := os.Getenv("{{.Name | upper}}_REQUEST_MAX_SIZE"); val != "" {
+			if val := getEnvVar("{{.Name | upper}}_REQUEST_MAX_SIZE"); val != "" {
 				if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
 					return parsed
 				}
@@ -118,7 +143,7 @@ func LoadConfigVarsFromEnv() (*ConfigVars, error) {
 			return 10485760 // 10MB default
 		}(),
 		MaxHeaderSize: func() int64 {
-			if val := os.Getenv("{{.Name | upper}}_REQUEST_MAX_HEADER_SIZE"); val != "" {
+			if val := getEnvVar("{{.Name | upper}}_REQUEST_MAX_HEADER_SIZE"); val != "" {
 				if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
 					return parsed
 				}
@@ -126,7 +151,7 @@ func LoadConfigVarsFromEnv() (*ConfigVars, error) {
 			return 1048576 // 1MB default
 		}(),
 		MaxFileUploadSize: func() int64 {
-			if val := os.Getenv("{{.Name | upper}}_REQUEST_MAX_FILE_UPLOAD_SIZE"); val != "" {
+			if val := getEnvVar("{{.Name | upper}}_REQUEST_MAX_FILE_UPLOAD_SIZE"); val != "" {
 				if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
 					return parsed
 				}
@@ -134,7 +159,7 @@ func LoadConfigVarsFromEnv() (*ConfigVars, error) {
 			return 104857600 // 100MB default
 		}(),
 		ReadTimeout: func() int {
-			if val := os.Getenv("{{.Name | upper}}_REQUEST_READ_TIMEOUT"); val != "" {
+			if val := getEnvVar("{{.Name | upper}}_REQUEST_READ_TIMEOUT"); val != "" {
 				if parsed, err := strconv.Atoi(val); err == nil {
 					return parsed
 				}
@@ -142,7 +167,7 @@ func LoadConfigVarsFromEnv() (*ConfigVars, error) {
 			return 30 // 30 seconds default
 		}(),
 		WriteTimeout: func() int {
-			if val := os.Getenv("{{.Name | upper}}_REQUEST_WRITE_TIMEOUT"); val != "" {
+			if val := getEnvVar("{{.Name | upper}}_REQUEST_WRITE_TIMEOUT"); val != "" {
 				if parsed, err := strconv.Atoi(val); err == nil {
 					return parsed
 				}

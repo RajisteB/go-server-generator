@@ -247,7 +247,7 @@ func TestSecurityHeadersMiddleware(t *testing.T) {
 	})
 
 	// Wrap with security headers middleware
-	securityHandler := m.SecurityHeadersMiddleware(config)
+	securityHandler := m.SecurityHeadersMiddleware(config)(handler)
 
 	req := httptest.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
@@ -284,7 +284,7 @@ func TestSecurityHeadersMiddleware_EmptyConfig(t *testing.T) {
 	})
 
 	// Wrap with security headers middleware
-	securityHandler := m.SecurityHeadersMiddleware(config)
+	securityHandler := m.SecurityHeadersMiddleware(config)(handler)
 
 	req := httptest.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
@@ -322,7 +322,7 @@ func TestRequestSizeLimitMiddleware(t *testing.T) {
 	})
 
 	// Wrap with request size limit middleware
-	sizeLimitHandler := m.RequestSizeLimitMiddleware(config)
+	sizeLimitHandler := m.RequestSizeLimitMiddleware(config)(handler)
 
 	tests := []struct {
 		name           string
@@ -363,16 +363,23 @@ func TestRequestTimeoutMiddleware(t *testing.T) {
 		ReadTimeout: 1, // 1 second
 	}
 
-	// Create a test handler that takes longer than timeout
+	// Create a test handler that respects context timeout
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Simulate long-running operation
-		time.Sleep(2 * time.Second)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("success"))
+		// Check if context is cancelled
+		select {
+		case <-r.Context().Done():
+			// Context was cancelled, return timeout error
+			http.Error(w, "Request timeout", http.StatusRequestTimeout)
+			return
+		case <-time.After(2 * time.Second):
+			// This should not be reached due to timeout
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("success"))
+		}
 	})
 
 	// Wrap with timeout middleware
-	timeoutHandler := m.RequestTimeoutMiddleware(config)
+	timeoutHandler := m.RequestTimeoutMiddleware(config)(handler)
 
 	req := httptest.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
@@ -381,13 +388,13 @@ func TestRequestTimeoutMiddleware(t *testing.T) {
 	timeoutHandler.ServeHTTP(w, req)
 	duration := time.Since(start)
 
-	// Should timeout and return context deadline exceeded
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Code)
+	// Should timeout and return RequestTimeout status
+	if w.Code != http.StatusRequestTimeout {
+		t.Errorf("Expected status code %d, got %d", http.StatusRequestTimeout, w.Code)
 	}
 
-	// Should complete quickly due to timeout
-	if duration > 2*time.Second {
+	// Should complete quickly due to timeout (within 1.5 seconds)
+	if duration > 1500*time.Millisecond {
 		t.Errorf("Request should timeout quickly, took %v", duration)
 	}
 }
@@ -458,31 +465,29 @@ func TestSafeJSONDecoder(t *testing.T) {
 	}
 }
 
+// TestResponseWriter tests the custom responseWriter functionality indirectly through LoggerMiddleware
 func TestResponseWriter(t *testing.T) {
-	// Test the custom responseWriter
+	m := middleware.NewMiddleware(nil, "test-secret")
+
+	// Create a test handler
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("test data"))
+	})
+
+	// Wrap with logger middleware to test responseWriter
+	loggerHandler := m.LoggerMiddleware(handler)
+
+	req := httptest.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	rw := &middleware.ResponseWriter{
-		ResponseWriter: w,
-		StatusCode:     http.StatusOK,
+
+	loggerHandler.ServeHTTP(w, req)
+
+	// Check that the response was handled correctly
+	if w.Code != http.StatusNotFound {
+		t.Errorf("Expected status code %d, got %d", http.StatusNotFound, w.Code)
 	}
 
-	// Test WriteHeader
-	rw.WriteHeader(http.StatusNotFound)
-	if rw.StatusCode != http.StatusNotFound {
-		t.Errorf("Expected status code %d, got %d", http.StatusNotFound, rw.StatusCode)
-	}
-
-	// Test Write
-	data := []byte("test data")
-	n, err := rw.Write(data)
-	if err != nil {
-		t.Errorf("Write returned error: %v", err)
-	}
-	if n != len(data) {
-		t.Errorf("Expected to write %d bytes, wrote %d", len(data), n)
-	}
-
-	// Check that data was written to underlying ResponseWriter
 	if w.Body.String() != "test data" {
 		t.Errorf("Expected body 'test data', got '%s'", w.Body.String())
 	}
@@ -534,7 +539,7 @@ func BenchmarkSecurityHeadersMiddleware(b *testing.B) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	securityHandler := m.SecurityHeadersMiddleware(config)
+	securityHandler := m.SecurityHeadersMiddleware(config)(handler)
 	req := httptest.NewRequest("GET", "/test", nil)
 
 	b.ResetTimer()

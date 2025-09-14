@@ -56,12 +56,12 @@ func TestGenerateNamespaceUUID(t *testing.T) {
 					t.Errorf("Generated UUID should match UUID format, got: %s", result)
 				}
 			} else {
-				// Extract UUID part after namespace
+				// Extract UUID part after namespace (last part after splitting on "_")
 				parts := strings.Split(result, "_")
 				if len(parts) < 2 {
 					t.Errorf("Generated UUID should have namespace prefix, got: %s", result)
 				} else {
-					uuidPart := parts[1]
+					uuidPart := parts[len(parts)-1] // Take the last part which is the UUID
 					if !uuidPattern.MatchString(uuidPart) {
 						t.Errorf("UUID part should match UUID format, got: %s", uuidPart)
 					}
@@ -174,12 +174,12 @@ func TestGenerateNamespaceShortUUID(t *testing.T) {
 					t.Errorf("Generated namespace short UUID should match hex format, got: %s", result)
 				}
 			} else {
-				// Extract UUID part after namespace
+				// Extract UUID part after namespace (last part after splitting on "_")
 				parts := strings.Split(result, "_")
 				if len(parts) < 2 {
 					t.Errorf("Generated namespace short UUID should have namespace prefix, got: %s", result)
 				} else {
-					uuidPart := parts[1]
+					uuidPart := parts[len(parts)-1] // Take the last part which is the short UUID
 					if !hexPattern.MatchString(uuidPart) {
 						t.Errorf("Short UUID part should match hex format, got: %s", uuidPart)
 					}
