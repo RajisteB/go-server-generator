@@ -59,17 +59,17 @@ install-tools:
 
 dev:
 	@echo "Starting development server..."
-	@if [ ! -f .env ]; then \
-		echo "Creating .env from .env.example..."; \
-		cp .env.example .env; \
+	@if [ ! -f .env.local ]; then \
+		echo "Creating .env.local from template..."; \
+		echo "Please copy .env.local and update with your configuration"; \
 	fi
 	go run main.go
 
 dev-watch:
 	@echo "Starting development server with file watching..."
-	@if [ ! -f .env ]; then \
-		echo "Creating .env from .env.example..."; \
-		cp .env.example .env; \
+	@if [ ! -f .env.local ]; then \
+		echo "Creating .env.local from template..."; \
+		echo "Please copy .env.local and update with your configuration"; \
 	fi
 	air
 
@@ -77,10 +77,9 @@ setup:
 	@echo "Setting up development environment..."
 	make install-deps
 	make install-tools
-	@if [ ! -f .env ]; then \
-		echo "Creating .env from .env.example..."; \
-		cp .env.example .env; \
-		echo "Please update .env with your configuration"; \
+	@if [ ! -f .env.local ]; then \
+		echo "Creating .env.local from template..."; \
+		echo "Please copy .env.local and update with your configuration"; \
 	fi
 	@echo "Setup complete!"
 

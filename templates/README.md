@@ -17,10 +17,10 @@
 
 1. Copy environment variables:
    ```bash
-   cp .env.example .env
+   cp .env.local .env.local
    ```
 
-2. Update the .env file with your configuration
+2. Update the .env.local file with your configuration
 
 3. Install dependencies:
    ```bash
@@ -70,7 +70,7 @@ docker run -p {{.Port}}:{{.Port}} {{.Name}}
 │       ├── datasource/    # Data access layer
 │       ├── models/        # Data models
 │       └── service/       # Business logic
-├── .env.example          # Environment variables template
+├── .env.local            # Environment variables template
 └── README.md            # This file
 ```
 
@@ -93,7 +93,7 @@ docker run -p {{.Port}}:{{.Port}} {{.Name}}
 
 ## Environment Variables
 
-See `.env.example` for all available configuration options.
+See `.env.local` for all available configuration options.
 
 ## Development
 

@@ -32,7 +32,7 @@ var templateFiles = []TemplateFile{
 	{"main.go", "main.go"},
 	{"go.mod", "go.mod"},
 	{"cmd_root.go", "cmd/root.go"},
-	{"env_example", ".env.example"},
+	{"env_local", ".env.local"},
 	{"README.md", "README.md"},
 	{"Makefile", "Makefile"},
 
@@ -162,8 +162,8 @@ func main() {
 	}
 
 	fmt.Printf("  cd %s\n", cdPath)
-	fmt.Println("  cp .env.example .env")
-	fmt.Println("  # Update .env with your configuration")
+	fmt.Println("  cp .env.local .env.local")
+	fmt.Println("  # Update .env.local with your configuration")
 	fmt.Println("  go mod tidy")
 	fmt.Println("  go run main.go")
 }
