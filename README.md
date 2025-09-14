@@ -1,6 +1,6 @@
 # Go Backend Project Generator
 
-A CLI tool that generates complete Go backend projects with a clean, scalable architecture based on the Cedarflow pattern.
+A CLI tool that generates complete Go backend projects with a clean, scalable architecture.
 
 ## 🚀 Quick Start
 
