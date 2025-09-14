@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=../../mocks/mock_health_service.go -package=mocks {{.Module}}/internal/health/service HealthService
+
 package health
 
 import (

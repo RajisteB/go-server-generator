@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=../../mocks/mock_users_service.go -package=mocks {{.Module}}/internal/users/service UsersService
+
 package users
 
 import (

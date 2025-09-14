@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=../../mocks/mock_users_datasource.go -package=mocks {{.Module}}/internal/users/datasource UsersDatasource
+
 package datasource
 
 import (

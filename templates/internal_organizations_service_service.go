@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=../../mocks/mock_organizations_service.go -package=mocks {{.Module}}/internal/organizations/service OrganizationsService
+
 package organizations
 
 import (

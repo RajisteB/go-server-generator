@@ -42,7 +42,7 @@ func (handler *Handler) GetCSRFToken(w http.ResponseWriter, r *http.Request) err
 func (h *Handler) HandleClerkWebhook(w http.ResponseWriter, r *http.Request) error {
 	l := h.Logger.WithContext(r.Context()).With("operation", "handleClerkWebhook")
 
-	body, err := httpHelpers.SafeBodyReader(r, 52428800)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		l.Error("failed to read webhook body", "error", err)
 		return err
@@ -56,7 +56,7 @@ func (h *Handler) HandleClerkWebhook(w http.ResponseWriter, r *http.Request) err
 	}
 
 	eventType := data["type"].(string)
-	if err := assertions.Assert(eventType != "", "eventType is required"); err != nil {
+	if err := assertions.AssertNonEmptyString(eventType); err != nil {
 		l.Error("eventType is required", "error", err)
 		return err
 	}

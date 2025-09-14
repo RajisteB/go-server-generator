@@ -26,7 +26,7 @@ type TemplateFile struct {
 	TargetPath string // Path in generated project
 }
 
-// Define all template files based on cedarflow architecture
+// Define all template files based on clean architecture
 var templateFiles = []TemplateFile{
 	// Core application files
 	{"main.go", "main.go"},
@@ -34,6 +34,7 @@ var templateFiles = []TemplateFile{
 	{"cmd_root.go", "cmd/root.go"},
 	{"env_example", ".env.example"},
 	{"README.md", "README.md"},
+	{"Makefile", "Makefile"},
 
 	// Configuration
 	{"internal_conf_vars.go", "internal/conf/vars.go"},
@@ -49,6 +50,16 @@ var templateFiles = []TemplateFile{
 	{"internal_shared_uuid_uuid.go", "internal/shared/uuid/uuid.go"},
 	{"internal_shared_assertions_assertions.go", "internal/shared/assertions/assertions.go"},
 	{"internal_shared_middleware_middleware.go", "internal/shared/middleware/middleware.go"},
+
+	// Shared utilities tests
+	{"internal_tests_shared_assertions_assertions_test.go", "internal/tests/shared/assertions/assertions_test.go"},
+	{"internal_tests_shared_validation_validation_test.go", "internal/tests/shared/validation/validation_test.go"},
+	{"internal_tests_shared_logger_logger_test.go", "internal/tests/shared/logger/logger_test.go"},
+	{"internal_tests_shared_environment_environment_test.go", "internal/tests/shared/environment/environment_test.go"},
+	{"internal_tests_shared_constants_constants_test.go", "internal/tests/shared/constants/constants_test.go"},
+	{"internal_tests_shared_http_http_test.go", "internal/tests/shared/http/http_test.go"},
+	{"internal_tests_shared_uuid_uuid_test.go", "internal/tests/shared/uuid/uuid_test.go"},
+	{"internal_tests_shared_middleware_middleware_test.go", "internal/tests/shared/middleware/middleware_test.go"},
 
 	// Handlers
 	{"internal_handlers_handlers.go", "internal/handlers/handlers.go"},
@@ -72,7 +83,7 @@ var templateFiles = []TemplateFile{
 }
 
 func main() {
-	fmt.Println("🚀 Go Backend Project Generator (Cedarflow-based)")
+	fmt.Println("🚀 Go Backend Project Generator")
 	fmt.Println("================================================")
 
 	config := ProjectConfig{}
