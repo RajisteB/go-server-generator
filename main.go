@@ -136,7 +136,12 @@ func main() {
 
 	// Set default project path if empty
 	if config.ProjectPath == "" {
-		config.ProjectPath = "."
+		// Use environment variable or default to current directory
+		if defaultDir := os.Getenv("NEW_GO_SERVER_DEFAULT_DIR"); defaultDir != "" {
+			config.ProjectPath = defaultDir
+		} else {
+			config.ProjectPath = "."
+		}
 	}
 
 	// Validate and expand the project path
@@ -161,6 +166,12 @@ func main() {
 		cdPath = config.Name
 	} else {
 		cdPath = config.ProjectPath
+	}
+
+	// Convert to ~/ format if it's under home directory
+	homeDir := os.Getenv("HOME")
+	if strings.HasPrefix(cdPath, homeDir) {
+		cdPath = "~" + strings.TrimPrefix(cdPath, homeDir)
 	}
 
 	fmt.Printf("  cd %s\n", cdPath)

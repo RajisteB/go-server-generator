@@ -36,6 +36,27 @@
    
    The server will start on port {{.Port}} (configurable via {{.Name | upper}}_SERVER_PORT environment variable)
 
+### Shell Function Setup
+
+To use the `go-server` command for creating new projects, add this to your `~/.bashrc` or `~/.zshrc`:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+export NEW_GO_SERVER_DEFAULT_DIR="$HOME/Projects"  # Set your default project directory
+source ~/Projects/go-scaffold/goscaffold.sh       # Load the go-server function
+```
+
+Then reload your shell:
+```bash
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+**Usage:**
+```bash
+go-server --create --name my-api --module github.com/user/my-api
+# Creates project in $NEW_GO_SERVER_DEFAULT_DIR/my-api and changes into it
+```
+
 ### Manual Setup
 
 1. **Install dependencies:**

@@ -13,6 +13,7 @@ go-server() {
     local port="8080"
     local project_path=""
     local interactive_mode=true
+    local default_dir="${NEW_GO_SERVER_DEFAULT_DIR:-$HOME/Projects}"
     
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -69,6 +70,9 @@ go-server() {
         return 1
     fi
     
+    # Store the original working directory
+    local original_dir="$(pwd)"
+    
     # Change to the scaffold directory
     cd "$scaffold_dir" || {
         echo "❌ Error: Could not change to $scaffold_dir"
@@ -105,21 +109,58 @@ go-server() {
     # Change to the created project directory
     local final_project_path=""
     if [[ -n "$project_path" ]]; then
-        final_project_path="$project_path"
+        # If absolute path, use it directly
+        if [[ "$project_path" == /* ]]; then
+            final_project_path="$project_path"
+        else
+            # If relative path, make it relative to original directory
+            final_project_path="$original_dir/$project_path"
+        fi
     else
-        final_project_path="$project_name"
+        # Default: create project in default directory with project name
+        final_project_path="$default_dir/$project_name"
     fi
     
-    # Only change directory if we have a valid project name and path
-    if [[ -n "$project_name" && -n "$final_project_path" ]]; then
-        echo ""
-        echo "📁 Changing to project directory: $final_project_path"
-        cd "$final_project_path" || {
-            echo "⚠️  Warning: Could not change to project directory: $final_project_path"
+    # Convert absolute path to ~/ format if it's under home directory
+    local home_dir="$HOME"
+    if [[ "$final_project_path" == "$home_dir"* ]]; then
+        final_project_path="~${final_project_path#$home_dir}"
+    fi
+    
+    # Always try to change directory - the Go program will have created the project
+    # We'll determine the project name from the "Next steps" output or use a fallback
+    echo ""
+    echo "📁 Attempting to change to project directory..."
+    
+    # Try to extract project name from the last output or use the provided name
+    local actual_project_name="$project_name"
+    if [[ -z "$actual_project_name" ]]; then
+        # If no project name was provided via args, try to find the most recent directory
+        # that was created in the default directory
+        actual_project_name=$(find "$default_dir" -maxdepth 1 -type d -newer "$default_dir" 2>/dev/null | head -1 | xargs basename)
+    fi
+    
+    if [[ -n "$actual_project_name" ]]; then
+        # Determine the correct path based on whether a custom path was provided
+        local expanded_path=""
+        if [[ -n "$project_path" ]]; then
+            # Use the custom path
+            if [[ "$project_path" == /* ]]; then
+                expanded_path="$project_path"
+            else
+                expanded_path="$original_dir/$project_path"
+            fi
+        else
+            # Use the default directory
+            expanded_path="$default_dir/$actual_project_name"
+        fi
+        
+        echo "📁 Changing to project directory: ~${expanded_path#$HOME}"
+        cd "$expanded_path" || {
+            echo "⚠️  Warning: Could not change to project directory: ~${expanded_path#$HOME}"
             echo "   You may need to manually navigate to your project directory"
         }
     else
-        echo ""
         echo "⚠️  Warning: Could not determine project directory to change into"
         echo "   Please manually navigate to your project directory"
     fi
