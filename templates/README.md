@@ -12,33 +12,64 @@
 - ✅ **Request Validation** - Input validation and sanitization
 - ✅ **Health Checks** - Application health monitoring
 - ✅ **Graceful Shutdown** - Proper server shutdown handling
+- ✅ **Configuration Management** - Viper-based config with .env.local support
+- ✅ **UUID Generation** - Multiple UUID formats (standard, short, namespaced)
+- ✅ **CI/CD Pipeline** - GitHub Actions workflow with tests, coverage, and builds
+- ✅ **Development Tools** - Makefile with comprehensive development commands
 
 ## Getting Started
 
-1. Copy environment variables:
+### Quick Start
+
+1. **Setup development environment:**
    ```bash
-   cp .env.local .env.local
+   make setup
    ```
 
-2. Update the .env.local file with your configuration
+2. **Update configuration:**
+   Edit `.env.local` with your configuration (database, Clerk keys, etc.)
 
-3. Install dependencies:
+3. **Run the application:**
    ```bash
-   go mod tidy
-   ```
-
-4. Run the application:
-   ```bash
-   go run main.go
+   make dev
    ```
    
    The server will start on port {{.Port}} (configurable via {{.Name | upper}}_SERVER_PORT environment variable)
+
+### Manual Setup
+
+1. **Install dependencies:**
+   ```bash
+   make install-deps
+   ```
+
+2. **Install development tools:**
+   ```bash
+   make install-tools
+   ```
+
+3. **Run tests:**
+   ```bash
+   make test
+   ```
+
+4. **Build application:**
+   ```bash
+   make build
+   ```
 
 ## Docker
 
 Build and run with Docker:
 
 ```bash
+# Build Docker image
+make docker-build
+
+# Run with Docker Compose
+make docker-run
+
+# Or manually:
 docker build -t {{.Name}} .
 docker run -p {{.Port}}:{{.Port}} {{.Name}}
 ```
@@ -47,7 +78,10 @@ docker run -p {{.Port}}:{{.Port}} {{.Name}}
 
 ```
 .
-├── cmd/                    # Application entrypoints
+├── .github/               # GitHub Actions CI/CD
+│   └── workflows/
+│       └── ci.yml         # CI pipeline
+├── cmd/                   # Application entrypoints
 ├── internal/              # Private application code
 │   ├── conf/              # Configuration management
 │   ├── handlers/          # HTTP request handlers
@@ -65,13 +99,16 @@ docker run -p {{.Port}}:{{.Port}} {{.Name}}
 │   │   ├── middleware/    # HTTP middleware
 │   │   ├── uuid/          # UUID generation
 │   │   └── validation/    # Input validation
+│   ├── tests/             # Test files
 │   └── users/             # User domain
 │       ├── controller/    # HTTP controllers
 │       ├── datasource/    # Data access layer
 │       ├── models/        # Data models
 │       └── service/       # Business logic
 ├── .env.local            # Environment variables template
-└── README.md            # This file
+├── .gitignore            # Git ignore rules
+├── Makefile              # Development commands
+└── README.md             # This file
 ```
 
 ## API Endpoints
@@ -93,7 +130,13 @@ docker run -p {{.Port}}:{{.Port}} {{.Name}}
 
 ## Environment Variables
 
-See `.env.local` for all available configuration options.
+See `.env.local` for all available configuration options. The application uses Viper for configuration management, which automatically loads from `.env.local` files with fallback to system environment variables.
+
+### Key Configuration Areas:
+- **Server**: Host, port, protocol, environment
+- **Database**: PostgreSQL connection settings (default password: `root`)
+- **Clerk**: Authentication keys and configuration
+- **Security**: CSRF, security headers, request limits
 
 ## Development
 
@@ -104,6 +147,31 @@ The project follows clean architecture principles with clear separation of conce
 - **Datasources**: Handle data persistence
 - **Models**: Define data structures
 - **Shared**: Reusable utilities and middleware
+
+### Available Commands
+
+```bash
+make help              # Show all available commands
+make setup             # Setup development environment
+make dev               # Start development server
+make dev-watch         # Start with file watching (requires air)
+make test              # Run unit tests
+make coverage          # Generate coverage report
+make build             # Build application
+make lint              # Run linter (requires golangci-lint)
+make static-analysis   # Run static analysis tools
+make check-rules       # Run NASA rule checks
+make clean             # Clean build artifacts
+```
+
+### CI/CD Pipeline
+
+The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs:
+- **Tests**: Unit tests with coverage
+- **Safety Checks**: NASA rule compliance
+- **Coverage**: Test coverage reporting
+- **Build**: Application compilation
+- **Lint**: Code quality checks (commented out, ready to enable)
 
 ## Contributing
 
