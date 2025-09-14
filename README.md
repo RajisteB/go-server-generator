@@ -1,6 +1,6 @@
 # Go Backend Project Generator
 
-A CLI tool that generates complete Go backend projects with a clean, scalable architecture based on the Cedarflow pattern.
+A CLI tool that generates complete Go backend projects with a clean, scalable architecture with Clerk auth for identity management.
 
 ## 🚀 Quick Start
 
@@ -59,7 +59,7 @@ your-project/
 
 ## 🛠️ Features
 
-- **Clean Architecture**: Follows Cedarflow pattern with clear separation of concerns
+- **Clean Architecture**: Follows DDD pattern with clear separation of concerns
 - **Modular Design**: Organized into logical modules (users, organizations, health)
 - **Configuration Management**: Centralized config with environment variable support
 - **Database Integration**: PostgreSQL integration with connection management
