@@ -33,6 +33,8 @@ var templateFiles = []TemplateFile{
 	{"go.mod", "go.mod"},
 	{"cmd_root.go", "cmd/root.go"},
 	{"env_local", ".env.local"},
+	{"gitignore", ".gitignore"},
+	{"github_yml", ".github/workflows/ci.yml"},
 	{"README.md", "README.md"},
 	{"Makefile", "Makefile"},
 

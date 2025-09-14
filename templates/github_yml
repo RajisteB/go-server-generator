@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v4
+  #     with:
+  #       go-version: 1.24.0
+  #   - name: golangci-lint
+  #     uses: golangci/golangci-lint-action@v3
+  #     with:
+  #       version: v1.54.2
+  #       args: --timeout=5m
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.24.0
+      - name: Install dependencies
+        run: make install-deps
+      - name: Run tests
+        run: make test
+
+  safety-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.24.0
+      - name: Install dependencies
+        run: make install-deps
+      - name: Run NASA rule checks
+        run: make check-rules
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.24.0
+      - name: Install dependencies
+        run: make install-deps
+      - name: Run coverage
+        run: make coverage
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.24.0
+      - name: Install dependencies
+        run: make install-deps
+      - name: Build application
+        run: make build

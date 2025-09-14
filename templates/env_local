@@ -11,7 +11,7 @@
 {{.Name | upper}}_DATABASE_PORT=5432
 {{.Name | upper}}_DATABASE_NAME={{.Name}}_db
 {{.Name | upper}}_DATABASE_USER=postgres
-{{.Name | upper}}_DATABASE_PASSWORD=password
+{{.Name | upper}}_DATABASE_PASSWORD=root
 {{.Name | upper}}_DATABASE_SSL_MODE=disable
 
 # Clerk Authentication
