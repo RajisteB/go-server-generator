@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"{{.Module}}/internal/shared/http"
+	httpHelpers "{{.Module}}/internal/shared/http"
 )
 
 func TestRespondWithJSON(t *testing.T) {
@@ -71,7 +71,7 @@ func TestRespondWithJSON(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 
-			err := http.RespondWithJSON(w, tt.statusCode, tt.data)
+			err := httpHelpers.RespondWithJSON(w, tt.statusCode, tt.data)
 			if err != nil {
 				t.Fatalf("RespondWithJSON returned error: %v", err)
 			}
@@ -113,7 +113,7 @@ func TestRespondWithJSON_ErrorHandling(t *testing.T) {
 	// Create a channel (cannot be marshaled to JSON)
 	unmarshallableData := make(chan int)
 
-	err := http.RespondWithJSON(w, http.StatusOK, unmarshallableData)
+	err := httpHelpers.RespondWithJSON(w, http.StatusOK, unmarshallableData)
 	if err == nil {
 		t.Error("Expected error when marshaling unmarshallable data")
 	}
@@ -166,7 +166,7 @@ func TestRespondWithError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 
-			err := http.RespondWithError(w, tt.err)
+			err := httpHelpers.RespondWithError(w, tt.err)
 			if err != nil {
 				t.Fatalf("RespondWithError returned error: %v", err)
 			}
@@ -204,32 +204,32 @@ func TestRespondWithError(t *testing.T) {
 func TestHandlerFunc_ServeHTTP(t *testing.T) {
 	tests := []struct {
 		name           string
-		handlerFunc    http.HandlerFunc
+		handlerFunc    httpHelpers.HandlerFunc
 		expectedStatus int
 		expectError    bool
 	}{
 		{
 			name: "successful handler",
-			handlerFunc: func(w http.ResponseWriter, r *http.Request) error {
-				return http.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "success"})
-			},
+			handlerFunc: httpHelpers.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+				return httpHelpers.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "success"})
+			}),
 			expectedStatus: http.StatusOK,
 			expectError:    false,
 		},
 		{
 			name: "handler that returns error",
-			handlerFunc: func(w http.ResponseWriter, r *http.Request) error {
+			handlerFunc: httpHelpers.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 				return errors.New("handler error")
-			},
+			}),
 			expectedStatus: http.StatusInternalServerError,
 			expectError:    true,
 		},
 		{
 			name: "handler that returns nil error",
-			handlerFunc: func(w http.ResponseWriter, r *http.Request) error {
+			handlerFunc: httpHelpers.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 				w.WriteHeader(http.StatusNoContent)
 				return nil
-			},
+			}),
 			expectedStatus: http.StatusNoContent,
 			expectError:    false,
 		},
@@ -240,7 +240,7 @@ func TestHandlerFunc_ServeHTTP(t *testing.T) {
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest("GET", "/test", nil)
 
-			handler := http.HandlerFunc(tt.handlerFunc)
+			handler := tt.handlerFunc
 			handler.ServeHTTP(w, r)
 
 			// Check status code
@@ -272,7 +272,7 @@ func TestHandlerFunc_ServeHTTP(t *testing.T) {
 
 func TestHandlerFunc_ImplementsHandler(t *testing.T) {
 	// Test that HandlerFunc implements http.Handler interface
-	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+	var handler http.Handler = httpHelpers.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	})
 
@@ -296,7 +296,7 @@ func TestRespondWithJSON_HeadersPreserved(t *testing.T) {
 	w.Header().Set("Cache-Control", "no-cache")
 
 	data := map[string]string{"message": "test"}
-	err := http.RespondWithJSON(w, http.StatusOK, data)
+	err := httpHelpers.RespondWithJSON(w, http.StatusOK, data)
 	if err != nil {
 		t.Fatalf("RespondWithJSON returned error: %v", err)
 	}
@@ -323,7 +323,7 @@ func TestRespondWithError_HeadersPreserved(t *testing.T) {
 	w.Header().Set("X-Custom-Header", "custom-value")
 	w.Header().Set("Cache-Control", "no-cache")
 
-	err := http.RespondWithError(w, errors.New("test error"))
+	err := httpHelpers.RespondWithError(w, errors.New("test error"))
 	if err != nil {
 		t.Fatalf("RespondWithError returned error: %v", err)
 	}
@@ -357,7 +357,7 @@ func TestRespondWithJSON_LargeData(t *testing.T) {
 		}
 	}
 
-	err := http.RespondWithJSON(w, http.StatusOK, largeData)
+	err := httpHelpers.RespondWithJSON(w, http.StatusOK, largeData)
 	if err != nil {
 		t.Fatalf("RespondWithJSON returned error: %v", err)
 	}
@@ -391,7 +391,7 @@ func BenchmarkRespondWithJSON(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		http.RespondWithJSON(w, http.StatusOK, data)
+		httpHelpers.RespondWithJSON(w, http.StatusOK, data)
 		w.Body.Reset()
 		w.Code = 0
 		w.HeaderMap = make(http.Header)
@@ -404,7 +404,7 @@ func BenchmarkRespondWithError(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		http.RespondWithError(w, err)
+		httpHelpers.RespondWithError(w, err)
 		w.Body.Reset()
 		w.Code = 0
 		w.HeaderMap = make(http.Header)
@@ -412,8 +412,8 @@ func BenchmarkRespondWithError(b *testing.B) {
 }
 
 func BenchmarkHandlerFunc_ServeHTTP(b *testing.B) {
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
-		return http.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "success"})
+	handler := httpHelpers.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+		return httpHelpers.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "success"})
 	})
 
 	b.ResetTimer()

@@ -23,8 +23,15 @@ func RespondWithError(w http.ResponseWriter, err error) error {
 	// and set appropriate status codes
 
 	w.WriteHeader(statusCode)
+
+	// Handle nil error
+	errorMessage := ""
+	if err != nil {
+		errorMessage = err.Error()
+	}
+
 	errorResponse := map[string]string{
-		"error": err.Error(),
+		"error": errorMessage,
 	}
 	return json.NewEncoder(w).Encode(errorResponse)
 }

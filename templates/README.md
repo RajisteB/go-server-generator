@@ -60,7 +60,6 @@ docker run -p {{.Port}}:{{.Port}} {{.Name}}
 │   ├── shared/            # Shared utilities
 │   │   ├── assertions/    # Validation assertions
 │   │   ├── constants/     # Application constants
-│   │   ├── environment/   # Environment utilities
 │   │   ├── http/          # HTTP helpers
 │   │   ├── logger/        # Structured logging
 │   │   ├── middleware/    # HTTP middleware

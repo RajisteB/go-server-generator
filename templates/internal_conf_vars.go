@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 
-	"{{.Module}}/internal/shared/environment"
 	"{{.Module}}/internal/shared/validation"
 )
 
@@ -65,7 +64,6 @@ type ConfigVars struct {
 
 // LoadConfigVarsFromEnv loads and validates all application configuration variables from environment variables.
 func LoadConfigVarsFromEnv() (*ConfigVars, error) {
-	environment.LoadEnvVarsFromEnv()
 	dbVars := DatabaseVars{
 		DatabaseHost:     os.Getenv("{{.Name | upper}}_DATABASE_HOST"),
 		DatabasePort:     os.Getenv("{{.Name | upper}}_DATABASE_PORT"),

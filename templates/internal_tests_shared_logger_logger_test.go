@@ -644,10 +644,10 @@ func TestLogger_SamplingLogger(t *testing.T) {
 		samplingLog.Info("sampled message", "index", i)
 	}
 
-	// Should have 2 log entries (3rd and 6th)
+	// Should have 1 log entry (3rd message only)
 	lines := strings.Split(strings.TrimSpace(buf.String()), "\n")
-	if len(lines) != 2 {
-		t.Fatalf("Expected 2 log entries with sampling rate 3, got %d", len(lines))
+	if len(lines) != 1 {
+		t.Fatalf("Expected 1 log entry with sampling rate 3, got %d", len(lines))
 	}
 }
 

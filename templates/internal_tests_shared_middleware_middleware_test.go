@@ -7,11 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/clerkinc/clerk-sdk-go/clerk"
 	"{{.Module}}/internal/shared/middleware"
 )
 
 func TestNewMiddleware(t *testing.T) {
-	clerkClient := nil // Mock clerk client
+	var clerkClient clerk.Client // Mock clerk client
 	clerkSecret := "test-secret"
 
 	m := middleware.NewMiddleware(clerkClient, clerkSecret)

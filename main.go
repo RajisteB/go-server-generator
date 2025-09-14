@@ -44,7 +44,6 @@ var templateFiles = []TemplateFile{
 	// Shared utilities
 	{"internal_shared_logger_logger.go", "internal/shared/logger/logger.go"},
 	{"internal_shared_validation_validation.go", "internal/shared/validation/validation.go"},
-	{"internal_shared_environment_environment.go", "internal/shared/environment/environment.go"},
 	{"internal_shared_constants_constants.go", "internal/shared/constants/constants.go"},
 	{"internal_shared_http_http.go", "internal/shared/http/http.go"},
 	{"internal_shared_uuid_uuid.go", "internal/shared/uuid/uuid.go"},
@@ -55,7 +54,6 @@ var templateFiles = []TemplateFile{
 	{"internal_tests_shared_assertions_assertions_test.go", "internal/tests/shared/assertions/assertions_test.go"},
 	{"internal_tests_shared_validation_validation_test.go", "internal/tests/shared/validation/validation_test.go"},
 	{"internal_tests_shared_logger_logger_test.go", "internal/tests/shared/logger/logger_test.go"},
-	{"internal_tests_shared_environment_environment_test.go", "internal/tests/shared/environment/environment_test.go"},
 	{"internal_tests_shared_constants_constants_test.go", "internal/tests/shared/constants/constants_test.go"},
 	{"internal_tests_shared_http_http_test.go", "internal/tests/shared/http/http_test.go"},
 	{"internal_tests_shared_uuid_uuid_test.go", "internal/tests/shared/uuid/uuid_test.go"},
