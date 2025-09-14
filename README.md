@@ -1,6 +1,6 @@
 # Go Backend Project Generator
 
-A CLI tool that generates complete Go backend projects with a clean, scalable architecture.
+A CLI tool that generates complete Go backend projects with a clean, scalable architecture with Clerk auth for identity management.
 
 ## 🚀 Quick Start
 
