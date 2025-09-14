@@ -3,7 +3,7 @@
 # Go Server Generator Function
 # Compatible with both bash and zsh
 # Add this function to your ~/.bashrc or ~/.zshrc file
-# Usage: go-server --create [options]
+# Usage: go-server --create [options]ls
 
 go-server() {
     local scaffold_dir="$HOME/Projects/go-scaffold"
@@ -127,43 +127,29 @@ go-server() {
         final_project_path="~${final_project_path#$home_dir}"
     fi
     
-    # Always try to change directory - the Go program will have created the project
-    # We'll determine the project name from the "Next steps" output or use a fallback
+    # Change to the created project directory
     echo ""
-    echo "📁 Attempting to change to project directory..."
+    echo "📁 Changing to project directory..."
     
-    # Try to extract project name from the last output or use the provided name
-    local actual_project_name="$project_name"
-    if [[ -z "$actual_project_name" ]]; then
-        # If no project name was provided via args, try to find the most recent directory
-        # that was created in the default directory
-        actual_project_name=$(find "$default_dir" -maxdepth 1 -type d -newer "$default_dir" 2>/dev/null | head -1 | xargs basename)
-    fi
-    
-    if [[ -n "$actual_project_name" ]]; then
-        # Determine the correct path based on whether a custom path was provided
-        local expanded_path=""
-        if [[ -n "$project_path" ]]; then
-            # Use the custom path
-            if [[ "$project_path" == /* ]]; then
-                expanded_path="$project_path"
-            else
-                expanded_path="$original_dir/$project_path"
-            fi
+    # Determine the correct path based on whether a custom path was provided
+    local expanded_path=""
+    if [[ -n "$project_path" ]]; then
+        # Use the custom path
+        if [[ "$project_path" == /* ]]; then
+            expanded_path="$project_path"
         else
-            # Use the default directory
-            expanded_path="$default_dir/$actual_project_name"
+            expanded_path="$original_dir/$project_path"
         fi
-        
-        echo "📁 Changing to project directory: ~${expanded_path#$HOME}"
-        cd "$expanded_path" || {
-            echo "⚠️  Warning: Could not change to project directory: ~${expanded_path#$HOME}"
-            echo "   You may need to manually navigate to your project directory"
-        }
     else
-        echo "⚠️  Warning: Could not determine project directory to change into"
-        echo "   Please manually navigate to your project directory"
+        # Use the default directory with project name
+        expanded_path="$default_dir/$project_name"
     fi
+    
+    echo "📁 Changing to project directory: ~${expanded_path#$HOME}"
+    cd "$expanded_path" || {
+        echo "⚠️  Warning: Could not change to project directory: ~${expanded_path#$HOME}"
+        echo "   You may need to manually navigate to your project directory"
+    }
 }
 
 # Help function

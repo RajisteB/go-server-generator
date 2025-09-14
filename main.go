@@ -111,6 +111,12 @@ func main() {
 		config.Module = getUserInput("Go module name (e.g., github.com/username/project): ")
 	}
 
+	// Auto-convert simple names to project-name/module format
+	if !strings.Contains(config.Module, "/") {
+		config.Module = config.Name + "/" + config.Module
+	}
+
+
 	if *description != "" {
 		config.Description = *description
 	} else {
@@ -138,9 +144,9 @@ func main() {
 	if config.ProjectPath == "" {
 		// Use environment variable or default to current directory
 		if defaultDir := os.Getenv("NEW_GO_SERVER_DEFAULT_DIR"); defaultDir != "" {
-			config.ProjectPath = defaultDir
+			config.ProjectPath = filepath.Join(defaultDir, config.Name)
 		} else {
-			config.ProjectPath = "."
+			config.ProjectPath = config.Name
 		}
 	}
 
@@ -187,6 +193,7 @@ func getUserInput(prompt string) string {
 	scanner.Scan()
 	return strings.TrimSpace(scanner.Text())
 }
+
 
 func validateProjectPath(path string) error {
 	if path == "." {
