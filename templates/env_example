@@ -1,0 +1,38 @@
+# Server Configuration
+{{.Name | upper}}_SERVER_NAME={{.Name}}
+{{.Name | upper}}_SERVER_VERSION=1.0.0
+{{.Name | upper}}_SERVER_ENV=development
+{{.Name | upper}}_SERVER_HOST=localhost
+{{.Name | upper}}_SERVER_PORT={{.Port}}
+{{.Name | upper}}_SERVER_PROTOCOL=http
+
+# Database Configuration
+{{.Name | upper}}_DATABASE_HOST=localhost
+{{.Name | upper}}_DATABASE_PORT=5432
+{{.Name | upper}}_DATABASE_NAME={{.Name}}_db
+{{.Name | upper}}_DATABASE_USER=postgres
+{{.Name | upper}}_DATABASE_PASSWORD=password
+{{.Name | upper}}_DATABASE_SSL_MODE=disable
+
+# Clerk Authentication
+{{.Name | upper}}_CLERK_KEY=your_clerk_publishable_key
+{{.Name | upper}}_CLERK_SECRET=your_clerk_secret_key
+
+# CSRF Protection
+{{.Name | upper}}_CSRF_AUTH_KEY=your_csrf_auth_key_32_bytes_long
+{{.Name | upper}}_CSRF_SECURE=false
+
+# Security Headers
+{{.Name | upper}}_SECURITY_CSP_POLICY=default-src 'self'
+{{.Name | upper}}_SECURITY_HSTS_MAX_AGE=31536000
+{{.Name | upper}}_SECURITY_FRAME_OPTIONS=DENY
+{{.Name | upper}}_SECURITY_CONTENT_TYPE_OPTIONS=true
+{{.Name | upper}}_SECURITY_REFERRER_POLICY=strict-origin-when-cross-origin
+{{.Name | upper}}_SECURITY_PERMISSIONS_POLICY=
+
+# Request Limits
+{{.Name | upper}}_REQUEST_MAX_SIZE=10485760
+{{.Name | upper}}_REQUEST_MAX_HEADER_SIZE=1048576
+{{.Name | upper}}_REQUEST_MAX_FILE_UPLOAD_SIZE=104857600
+{{.Name | upper}}_REQUEST_READ_TIMEOUT=30
+{{.Name | upper}}_REQUEST_WRITE_TIMEOUT=30
